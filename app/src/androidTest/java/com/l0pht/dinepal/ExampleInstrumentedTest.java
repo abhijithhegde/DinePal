@@ -1,4 +1,4 @@
-package com.bestsoft.dinepal;
+package com.l0pht.dinepal;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.bestsoft.dinepal", appContext.getPackageName());
+        assertEquals("com.l0pht.dinepal", appContext.getPackageName());
     }
 }

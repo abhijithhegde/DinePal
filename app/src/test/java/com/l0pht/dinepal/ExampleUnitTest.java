@@ -1,4 +1,4 @@
-package com.bestsoft.dinepal;
+package com.l0pht.dinepal;
 
 import org.junit.Test;
 
