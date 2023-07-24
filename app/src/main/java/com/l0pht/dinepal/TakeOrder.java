@@ -7,8 +7,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Objects;
 
 public class TakeOrder extends AppCompatActivity {
     EditText search;
@@ -20,11 +23,12 @@ public class TakeOrder extends AppCompatActivity {
     String[] tables = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     ArrayAdapter<String> tableAdapter;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take_order);
-
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         search = findViewById(R.id.search);
         selectTableNo = findViewById(R.id.selectTableNo);
@@ -33,8 +37,18 @@ public class TakeOrder extends AppCompatActivity {
         order = findViewById(R.id.orderNo);
         order.setText(String.valueOf(orderNo));
 
+
         tableAdapter = new ArrayAdapter<>(this, R.layout.tables_list, tables);
         selectTableNo.setAdapter(tableAdapter);
+
+        DatabaseHelper db = new DatabaseHelper(getApplicationContext());
+        db.insertItems("Chicken Momo", 150);
+        db.insertItems("Buff Momo", 200);
+        db.insertItems("Veg Momo", 100);
+        db.insertItems("Chicken Chowmein", 150);
+        db.insertItems("Buff Chowmein", 200);
+        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
+        db.insertItems("Veg Chowmein", 100);
 
 
         placeOrder.setOnClickListener(v -> {
@@ -45,6 +59,7 @@ public class TakeOrder extends AppCompatActivity {
             orderNo += 1;
             setResult(RESULT_OK, resultIntent);
             finish();
+
         });
     }
 }
