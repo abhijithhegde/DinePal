@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,16 +46,17 @@ public class DashBoard extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent updateOrder = new Intent(DashBoard.this, TakeOrder.class);
+                Intent updateOrder = new Intent(DashBoard.this, UpdateOrder.class);
                 TextView table = view.findViewById(R.id.tableNo);
                 TextView order = view.findViewById(R.id.orderNo);
-                updateOrder.putExtra("tableNo", table.getText().toString());
+                updateOrder.putExtra("tableNo", Integer.parseInt(table.getText().toString()));
                 updateOrder.putExtra("order", order.getText().toString());
                 updateOrder.putExtra("newOrder", false);
                 startActivityForResult(updateOrder, 1);
 
             }
         });
+
     }
 
     @Override
@@ -84,7 +84,8 @@ public class DashBoard extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.editMenu) {
-            Toast.makeText(this, "Pressed", Toast.LENGTH_SHORT).show();
+            Intent editMenuIntent = new Intent(DashBoard.this, EditMenu.class);
+            startActivity(editMenuIntent);
         }
         return super.onOptionsItemSelected(item);
     }

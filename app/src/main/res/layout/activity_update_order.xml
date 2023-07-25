@@ -67,16 +67,12 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/search"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:completionThreshold="1"
-        android:drawableEnd="@drawable/search_menu"
+        android:layout_height="wrap_content"
         android:hint="Search"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:maxLines="1"
+        android:drawableEnd="@drawable/search_menu"
         android:textColor="@color/black"
         android:textColorHint="#7d8890"
         android:textSize="20sp"
@@ -117,16 +113,32 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.963" />
 
+    <Button
+        android:id="@+id/editOrder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#2b62a2"
+        android:text="Edit Order"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.963" />
+
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="400dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/search"
-        app:layout_constraintVertical_bias="0.048">
+        app:layout_constraintVertical_bias="0.048" >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"

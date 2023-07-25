@@ -1,27 +1,37 @@
 package com.l0pht.dinepal;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class TakeOrder extends AppCompatActivity {
-    EditText search;
+    DatabaseHelper databaseHelper;
     TextView order;
-    AutoCompleteTextView selectTableNo;
-    Button placeOrder, editOrder, deleteOrder;
+    AutoCompleteTextView selectTableNo, search;
+    Button placeOrder;
     int tableNo;
     static int orderNo = 1;
     String[] tables = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     ArrayAdapter<String> tableAdapter;
+    RecyclerView recyclerView;
+    List<OrderedItem> orderedItemsList;
+    OrderedItemsAdapter orderedItemsAdapter;
 
 
     @Override
@@ -33,33 +43,98 @@ public class TakeOrder extends AppCompatActivity {
         search = findViewById(R.id.search);
         selectTableNo = findViewById(R.id.selectTableNo);
         placeOrder = findViewById(R.id.placeOrder);
-        editOrder = findViewById(R.id.editOrder);
         order = findViewById(R.id.orderNo);
         order.setText(String.valueOf(orderNo));
+        recyclerView = findViewById(R.id.recyclerView);
 
 
         tableAdapter = new ArrayAdapter<>(this, R.layout.tables_list, tables);
         selectTableNo.setAdapter(tableAdapter);
 
-        DatabaseHelper db = new DatabaseHelper(getApplicationContext());
-        db.insertItems("Chicken Momo", 150);
-        db.insertItems("Buff Momo", 200);
-        db.insertItems("Veg Momo", 100);
-        db.insertItems("Chicken Chowmein", 150);
-        db.insertItems("Buff Chowmein", 200);
-        Toast.makeText(this, "Success", Toast.LENGTH_SHORT).show();
-        db.insertItems("Veg Chowmein", 100);
+        databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelper.insertItems("pai", 50);
+        setUpSearchAdapter();
+
+
+        orderedItemsList = new ArrayList<>();
+        orderedItemsAdapter = new OrderedItemsAdapter(this, orderedItemsList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(orderedItemsAdapter);
 
 
         placeOrder.setOnClickListener(v -> {
-            tableNo = Integer.parseInt(selectTableNo.getText().toString());
-            Intent resultIntent = new Intent(this, DashBoard.class);
-            resultIntent.putExtra("tableNo", tableNo);
-            resultIntent.putExtra("orderNo", orderNo);
-            orderNo += 1;
-            setResult(RESULT_OK, resultIntent);
-            finish();
-
+            if (isValid()) {
+                tableNo = Integer.parseInt(selectTableNo.getText().toString());
+                Intent resultIntent = new Intent(this, DashBoard.class);
+                resultIntent.putExtra("tableNo", tableNo);
+                resultIntent.putExtra("orderNo", orderNo);
+                orderNo += 1;
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            }
         });
     }
+
+    private void setUpSearchAdapter() {
+        String[] from = {DatabaseHelper.COLUMN_NAME};
+        int[] to = {android.R.id.text1};
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_dropdown_item_1line,
+                null, new String[]{DatabaseHelper.COLUMN_NAME}, new int[]{android.R.id.text1}, 0);
+
+
+        search.setAdapter(adapter);
+        search.setOnItemClickListener((parent, view, position, id) -> {
+            //log position;
+            TextView textView = view.findViewById(android.R.id.text1);
+            String selectedItem = textView.getText().toString();
+            search.setText(selectedItem);
+
+            double selectedItemPrice = databaseHelper.getItemPrice(selectedItem);
+
+            OrderedItem orderedItem = new OrderedItem(selectedItem, selectedItemPrice);
+            orderedItemsList.add(orderedItem);
+
+            orderedItemsAdapter.notifyDataSetChanged();
+            search.setText("");
+        });
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Fetch suggestions from the database based on the current text in the AutoCompleteTextView
+                try {
+                    String searchText = s.toString();
+                    Cursor cursor = databaseHelper.getSuggestions(searchText);
+                    adapter.changeCursor(cursor);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+    }
+
+    private boolean isValid() {
+        if (selectTableNo.getText().toString().isEmpty()) {
+            Toast.makeText(this, "Select Table Number", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }
+
