@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/linearr"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- First TextView -->
+    <TextView
+        android:id="@+id/tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dish1"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_alignParentStart="true"
+        android:gravity="center_vertical"/>
+
+    <!-- Second TextView -->
+
+    <!-- Edit Button -->
+    <TextView
+        android:id="@+id/tv2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="83dp"
+        android:layout_toRightOf="@id/tv1"
+        android:gravity="center_vertical"
+        android:text="Price:2000"
+        android:textColor="@android:color/black"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btnEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="46dp"
+        android:gravity="center_vertical"
+        android:text="Edit" />
+</RelativeLayout>

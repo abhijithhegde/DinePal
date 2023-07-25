@@ -84,7 +84,9 @@ public class DashBoard extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.editMenu) {
-            Toast.makeText(this, "Pressed", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, MenuListAdapter.class);
+            startActivity(intent);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
