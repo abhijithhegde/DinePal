@@ -59,7 +59,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("itemName", itemName);
         values.put("price", price);
         long newRowId = db.insert(TABLE_NAME, null, values);
-        Log.d("insertItems: ", "inserted");
         db.close();
         return newRowId;
     }
@@ -405,5 +404,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return rowsAffected > 0;
     }
-
 }

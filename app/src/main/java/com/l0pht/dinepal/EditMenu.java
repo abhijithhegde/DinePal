@@ -90,6 +90,8 @@ public class EditMenu extends AppCompatActivity implements EditMenuAdapter.OnEdi
                 if (!text1.isEmpty() && !text2.isEmpty()) {
                     int slNo = Integer.parseInt(text1);
                     double price = Double.parseDouble(text3);
+                    selectedItem.setItemName(text2);
+                    selectedItem.setItemPrice(price);
 
                     boolean isUpdated = databaseHelper.updateMenuItem(slNo, text2, price);
                     if (isUpdated) {
