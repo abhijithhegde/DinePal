@@ -44,10 +44,11 @@ public class EditMenuDialog extends Dialog {
 
         updateButton.setOnClickListener(v -> {
             dismiss();
+            String slNoText = slNoTextView.getText().toString();
             String itemNameText = itemNameEditText.getText().toString();
             String itemPriceText = itemPriceEditText.getText().toString();
             if (buttonClickListener != null) {
-                buttonClickListener.onUpdateButtonClick(itemNameText, itemPriceText);
+                buttonClickListener.onUpdateButtonClick(slNoText, itemNameText, itemPriceText);
             }
         });
     }
@@ -71,7 +72,7 @@ public class EditMenuDialog extends Dialog {
     public interface OnDialogButtonClickListener {
         void onDeleteButtonClick();
 
-        void onUpdateButtonClick(String itemName, String itemPrice);
+        void onUpdateButtonClick(String slNo, String itemName, String itemPrice);
     }
 }
 

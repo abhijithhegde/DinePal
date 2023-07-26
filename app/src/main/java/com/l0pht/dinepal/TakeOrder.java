@@ -56,7 +56,6 @@ public class TakeOrder extends AppCompatActivity {
         orderNo = databaseHelper.getCurrentOrderNO() + 1;
         order.setText(String.valueOf(orderNo));
 
-        databaseHelper.insertItems("Chicken Momo", 150);
         setUpSearchAdapter();
 
 

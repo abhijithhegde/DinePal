@@ -60,6 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put("price", price);
         long newRowId = db.insert(TABLE_NAME, null, values);
         Log.d("insertItems: ", "inserted");
+        db.close();
         return newRowId;
     }
 
@@ -140,24 +141,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return productId;
     }
+
     public int getIntItemID(int orderNo) {
         SQLiteDatabase db = this.getReadableDatabase();
         int prdtID = -1; // Default value if orderNo is not found
-        Cursor cursor = null;
 
-        try {
-            // Query the database to get the PrdtID for the given orderNo
-            cursor = db.query("order_mast", new String[]{"PrdtID"}, "OrderNo = ?", new String[]{String.valueOf(orderNo)}, null, null, null);
+        try (Cursor cursor = db.query("order_mast", new String[]{"PrdtID"}, "OrderNo = ?", new String[]{String.valueOf(orderNo)}, null, null, null)) {
 
             if (cursor != null && cursor.moveToFirst()) {
                 prdtID = cursor.getInt(cursor.getColumnIndexOrThrow("PrdtID"));
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
 
         return prdtID;
@@ -195,7 +190,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<OrderedItem> getOrderedItems(int orderNo) {
         List<OrderedItem> orderedItemsList = new ArrayList<>();
-        double totalAmount = 0.0;
 
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {"PrdtID", "Qty", "Rate", "ItemAmt"};
@@ -220,9 +214,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Create OrderedItem object and add it to the list
                 OrderedItem orderedItem = new OrderedItem(itemName, rate, qty);
                 orderedItemsList.add(orderedItem);
-
-                // Update the total amount
-                totalAmount += itemAmt;
             } while (cursor.moveToNext());
         }
 
@@ -283,11 +274,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<MenuItems> getAllMenuItems() {
         List<MenuItems> menuItemsList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = null;
 
-        try {
+        try (Cursor cursor = db.query("item_mast", null, null, null, null, null, null)) {
             // Query the item_mast table to get all the values
-            cursor = db.query("item_mast", null, null, null, null, null, null);
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
@@ -306,10 +295,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
 
         return menuItemsList;
@@ -401,6 +386,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         db.close();
+    }
+
+    public boolean deleteItem(int itemId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "DELETE FROM " + TABLE_NAME + " WHERE " + COLUMN_ITEM_CODE + " = " + itemId;
+        db.execSQL(query);
+        return true;
+    }
+
+    public boolean updateMenuItem(int slNo, String itemName, double price) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("ItemName", itemName);
+        values.put("Price", price);
+
+        int rowsAffected = db.update("item_mast", values, "_id = ?", new String[]{String.valueOf(slNo)});
+
+        return rowsAffected > 0;
     }
 
 }

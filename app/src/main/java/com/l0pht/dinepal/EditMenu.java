@@ -43,13 +43,13 @@ public class EditMenu extends AppCompatActivity implements EditMenuAdapter.OnEdi
                 }
 
                 @Override
-                public void onUpdateButtonClick(String text1, String text2) {
-                    if (!text1.isEmpty() && !text2.isEmpty()) {
-                        double price = Double.parseDouble(text2);
-                        long newRowId = databaseHelper.insertItems(text1, price);
+                public void onUpdateButtonClick(String text1, String text2, String text3) {
+                    if (!text2.isEmpty() && !text3.isEmpty()) {
+                        double price = Double.parseDouble(text3);
+                        long newRowId = databaseHelper.insertItems(text2, price);
                         if (newRowId != -1) {
                             Toast.makeText(EditMenu.this, "New Item Added!", Toast.LENGTH_SHORT).show();
-                            MenuItems newItem = new MenuItems((int) newRowId, text1, price);
+                            MenuItems newItem = new MenuItems((int) newRowId, text2, price);
                             menuItemsList.add(newItem);
                             editMenuDialog.dismiss();
                             editMenuAdapter.notifyDataSetChanged();
@@ -63,9 +63,8 @@ public class EditMenu extends AppCompatActivity implements EditMenuAdapter.OnEdi
             });
             editMenuDialog.show();
         });
-
-
         editMenuAdapter.setEditItemClickListener(this);
+
     }
 
     @Override
@@ -76,12 +75,33 @@ public class EditMenu extends AppCompatActivity implements EditMenuAdapter.OnEdi
         editMenuDialog.setOnDialogButtonClickListener(new EditMenuDialog.OnDialogButtonClickListener() {
             @Override
             public void onDeleteButtonClick() {
-                Toast.makeText(EditMenu.this, "Item Deleted", Toast.LENGTH_SHORT).show();
+                boolean deleted = databaseHelper.deleteItem(selectedItem.getSlNo());
+                if (deleted) {
+                    Toast.makeText(EditMenu.this, "Item Deleted", Toast.LENGTH_SHORT).show();
+                    menuItemsList.remove(position);
+                    editMenuAdapter.notifyItemRemoved(position);
+                } else {
+                    Toast.makeText(EditMenu.this, "Failed to delete item", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
-            public void onUpdateButtonClick(String text1, String text2) {
-                Toast.makeText(EditMenu.this, "Item Updated", Toast.LENGTH_SHORT).show();
+            public void onUpdateButtonClick(String text1, String text2, String text3) {
+                if (!text1.isEmpty() && !text2.isEmpty()) {
+                    int slNo = Integer.parseInt(text1);
+                    double price = Double.parseDouble(text3);
+
+                    boolean isUpdated = databaseHelper.updateMenuItem(slNo, text2, price);
+                    if (isUpdated) {
+                        Toast.makeText(EditMenu.this, "Item Updated", Toast.LENGTH_SHORT).show();
+//                        editMenuAdapter.notifyDataSetChanged();
+                        editMenuAdapter.notifyItemChanged(position);
+                    } else {
+                        Toast.makeText(EditMenu.this, "Failed to update item", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(EditMenu.this, "Please enter item name and price", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         editMenuDialog.show();
