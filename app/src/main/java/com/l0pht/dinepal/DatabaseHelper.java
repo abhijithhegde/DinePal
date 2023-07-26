@@ -1,5 +1,6 @@
 package com.l0pht.dinepal;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -180,9 +181,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query("order_mast", columns, selection, selectionArgs, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             do {
+                @SuppressLint("Range")
                 int prdtID = cursor.getInt(cursor.getColumnIndex("PrdtID"));
+                @SuppressLint("Range")
                 int qty = cursor.getInt(cursor.getColumnIndex("Qty"));
+                @SuppressLint("Range")
                 double rate = cursor.getDouble(cursor.getColumnIndex("Rate"));
+                @SuppressLint("Range")
                 double itemAmt = cursor.getDouble(cursor.getColumnIndex("ItemAmt"));
 
                 // Fetch the item name using prdtID from another table (e.g., item_mast)
@@ -229,6 +234,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ordersList;
     }
 
+    @SuppressLint("Range")
     public int getCurrentOrderNO() {
         int latestOrderNo = 0;
 
@@ -237,7 +243,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Query the database to fetch the maximum orderNo
         Cursor cursor = db.rawQuery("SELECT MAX(OrderNo) AS maxOrderNo FROM Order_mast", null);
-
         if (cursor != null && cursor.moveToFirst()) {
             latestOrderNo = cursor.getInt(cursor.getColumnIndex("maxOrderNo"));
             cursor.close();
@@ -258,8 +263,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     // Extract the values from the cursor
+                    @SuppressLint("Range")
                     int itemId = cursor.getInt(cursor.getColumnIndex("_id"));
+                    @SuppressLint("Range")
                     String itemName = cursor.getString(cursor.getColumnIndex("itemName"));
+                    @SuppressLint("Range")
                     double itemPrice = cursor.getDouble(cursor.getColumnIndex("price"));
 
                     // Create a MenuItems object and add it to the list

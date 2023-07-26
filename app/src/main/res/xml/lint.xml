@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Suppress ResourceType warnings -->
+    <issue id="Range">
+        <ignore path="**/*.java" />
+    </issue>
+</lint>
