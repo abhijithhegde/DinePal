@@ -293,4 +293,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
+    public void updateMenuItem(MenuItems selectedItem) {
+    }
 }

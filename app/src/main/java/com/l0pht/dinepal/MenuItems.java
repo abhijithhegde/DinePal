@@ -9,7 +9,6 @@ public class MenuItems {
         this.slNo = slNo;
         this.itemName = itemName;
         this.itemPrice = itemPrice;
-
     }
 
     public String getItemName() {
@@ -22,5 +21,13 @@ public class MenuItems {
 
     public int getSlNo() {
         return slNo;
+    }
+
+    public void setItemName(String editedItemName) {
+        this.itemName = editedItemName;
+    }
+
+    public void setItemPrice(double editedItemPrice) {
+        this.itemPrice = editedItemPrice;
     }
 }
