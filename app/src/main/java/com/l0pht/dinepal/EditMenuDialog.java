@@ -18,9 +18,7 @@ public class EditMenuDialog extends Dialog {
     private Button updateButton;
     private DatabaseHelper databaseHelper;
     private OnDialogButtonClickListener buttonClickListener;
-    public EditMenuDialog(@NonNull Context context) {
-        super(context);
-    }
+
     public EditMenuDialog(@NonNull Context context, int slNo, String itemName, String itemPrice, DatabaseHelper databaseHelper) {
         super(context);
         setContentView(R.layout.activity_edit_menu_dialog);
