@@ -16,17 +16,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class TakeOrder extends AppCompatActivity {
     DatabaseHelper databaseHelper;
-    TextView order;
+    TextView order, totalPrice;
     AutoCompleteTextView selectTableNo, search;
     Button placeOrder;
-    int tableNo;
-    static int orderNo = 1;
+    int tableNo, orderNo = 0;
     String[] tables = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
     ArrayAdapter<String> tableAdapter;
     RecyclerView recyclerView;
@@ -44,15 +46,17 @@ public class TakeOrder extends AppCompatActivity {
         selectTableNo = findViewById(R.id.selectTableNo);
         placeOrder = findViewById(R.id.placeOrder);
         order = findViewById(R.id.orderNo);
-        order.setText(String.valueOf(orderNo));
         recyclerView = findViewById(R.id.recyclerView);
-
+        totalPrice = findViewById(R.id.totalPrice);
 
         tableAdapter = new ArrayAdapter<>(this, R.layout.tables_list, tables);
         selectTableNo.setAdapter(tableAdapter);
 
         databaseHelper = new DatabaseHelper(getApplicationContext());
-        databaseHelper.insertItems("pai", 50);
+        orderNo = databaseHelper.getCurrentOrderNO() + 1;
+        order.setText(String.valueOf(orderNo));
+
+        databaseHelper.insertItems("Chicken Momo", 150);
         setUpSearchAdapter();
 
 
@@ -61,14 +65,38 @@ public class TakeOrder extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(orderedItemsAdapter);
 
+        orderedItemsAdapter.setOnItemClickListener(position -> {
+            OrderedItem orderedItem = orderedItemsList.get(position);
+            orderedItem.setQuantity(orderedItem.getQuantity() + 1);
+            orderedItemsAdapter.notifyDataSetChanged();
+            totalPrice.setText(String.valueOf(orderedItemsAdapter.calculateTotalPrice(1)));
+        });
+
+        orderedItemsAdapter.setOnItemLongClickListener(position -> {
+            OrderedItem orderedItem = orderedItemsList.get(position);
+            orderedItem.setQuantity(orderedItem.getQuantity() - 1);
+            orderedItemsAdapter.notifyDataSetChanged();
+            totalPrice.setText(String.valueOf(orderedItemsAdapter.calculateTotalPrice(0)));
+        });
+
 
         placeOrder.setOnClickListener(v -> {
             if (isValid()) {
                 tableNo = Integer.parseInt(selectTableNo.getText().toString());
+                int OrderSL = 1;
+                String TrDate = getCurrentDateAndTime();
+                for (OrderedItem orderedItem : orderedItemsList) {
+                    int PrdtID = databaseHelper.getItemId(orderedItem.getItemName());
+                    int Qty = orderedItem.getQuantity();
+                    double Rate = orderedItem.getItemPrice();
+                    double ItemAmt = Qty * Rate;
+                    databaseHelper.insertOrderDetails(TrDate, orderNo, tableNo, OrderSL, PrdtID, Qty, Rate, ItemAmt);
+                    OrderSL++;
+                }
                 Intent resultIntent = new Intent(this, DashBoard.class);
+
                 resultIntent.putExtra("tableNo", tableNo);
                 resultIntent.putExtra("orderNo", orderNo);
-                orderNo += 1;
                 setResult(RESULT_OK, resultIntent);
                 finish();
             }
@@ -79,9 +107,7 @@ public class TakeOrder extends AppCompatActivity {
         String[] from = {DatabaseHelper.COLUMN_NAME};
         int[] to = {android.R.id.text1};
 
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_dropdown_item_1line,
-                null, new String[]{DatabaseHelper.COLUMN_NAME}, new int[]{android.R.id.text1}, 0);
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_dropdown_item_1line, null, new String[]{DatabaseHelper.COLUMN_NAME}, new int[]{android.R.id.text1}, 0);
 
 
         search.setAdapter(adapter);
@@ -93,10 +119,12 @@ public class TakeOrder extends AppCompatActivity {
 
             double selectedItemPrice = databaseHelper.getItemPrice(selectedItem);
 
-            OrderedItem orderedItem = new OrderedItem(selectedItem, selectedItemPrice);
-            orderedItemsList.add(orderedItem);
-
-            orderedItemsAdapter.notifyDataSetChanged();
+            OrderedItem orderedItem = new OrderedItem(selectedItem, selectedItemPrice, 1);
+            if (!orderedItemsList.contains(orderedItem)) {
+                orderedItemsList.add(orderedItem);
+                orderedItemsAdapter.notifyDataSetChanged();
+                totalPrice.setText(String.valueOf(orderedItemsAdapter.calculateTotalPrice(1)));
+            }
             search.setText("");
         });
         search.addTextChangedListener(new TextWatcher() {
@@ -122,6 +150,12 @@ public class TakeOrder extends AppCompatActivity {
             }
         });
 
+    }
+
+    private String getCurrentDateAndTime() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return sdf.format(calendar.getTime());
     }
 
     private boolean isValid() {
