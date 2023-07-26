@@ -11,8 +11,6 @@ import androidx.annotation.NonNull;
 
 public class EditMenuDialog extends Dialog {
     private TextView slNoTextView, titleTextView;
-    private String editText1Hint;
-    private String editText2Hint;
     private EditText itemNameEditText, itemPriceEditText;
     private Button deleteButton;
     private Button updateButton;
