@@ -16,9 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DashBoard extends AppCompatActivity {
     DatabaseHelper databaseHelper;
@@ -39,29 +37,25 @@ public class DashBoard extends AppCompatActivity {
 
         ordersList = new ArrayList<>();
         databaseHelper = new DatabaseHelper(getApplicationContext());
-        List<Order> fetchedOrders = databaseHelper.getAllOrders();
-        Set<Order> ordersSet = new HashSet<>(fetchedOrders);
+        ordersList = databaseHelper.getAllOrders();
 
-        ordersList.addAll(ordersSet);
         adapter = new OrderListAdapter(this, ordersList);
+        listView.setAdapter(adapter);
 
         newOrder.setOnClickListener(v -> {
             Intent newOrder = new Intent(this, TakeOrder.class);
             startActivityForResult(newOrder, 1);
         });
-        listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent updateOrder = new Intent(DashBoard.this, UpdateOrder.class);
-                TextView table = view.findViewById(R.id.tableNo);
-                TextView order = view.findViewById(R.id.orderNo);
-                updateOrder.putExtra("tableNo", Integer.parseInt(table.getText().toString()));
-                updateOrder.putExtra("order", order.getText().toString());
-                startActivityForResult(updateOrder, 1);
 
-            }
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent updateOrder = new Intent(DashBoard.this, UpdateOrder.class);
+            TextView table = view.findViewById(R.id.tableNo);
+            TextView order = view.findViewById(R.id.orderNo);
+            updateOrder.putExtra("tableNo", Integer.parseInt(table.getText().toString()));
+            updateOrder.putExtra("order", order.getText().toString());
+            startActivityForResult(updateOrder, 1);
+
         });
 
     }

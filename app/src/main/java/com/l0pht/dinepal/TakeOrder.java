@@ -119,12 +119,30 @@ public class TakeOrder extends AppCompatActivity {
 
             double selectedItemPrice = databaseHelper.getItemPrice(selectedItem);
 
-            OrderedItem orderedItem = new OrderedItem(selectedItem, selectedItemPrice, 1);
-            if (!orderedItemsList.contains(orderedItem)) {
+            boolean itemExists = false;
+            for (OrderedItem existingItem : orderedItemsList) {
+                if (existingItem.getItemName().equals(selectedItem)) {
+                    // Item already exists, update its quantity
+                    existingItem.setQuantity(existingItem.getQuantity() + 1);
+                    orderedItemsAdapter.notifyDataSetChanged();
+                    totalPrice.setText(String.valueOf(orderedItemsAdapter.calculateTotalPrice(1)));
+                    itemExists = true;
+                    break;
+                }
+            }
+            if (!itemExists) {
+                // Item does not exist, add it as a new item to the list
+                OrderedItem orderedItem = new OrderedItem(selectedItem, selectedItemPrice, 1);
                 orderedItemsList.add(orderedItem);
                 orderedItemsAdapter.notifyDataSetChanged();
                 totalPrice.setText(String.valueOf(orderedItemsAdapter.calculateTotalPrice(1)));
             }
+            double totalPriceValue = orderedItemsAdapter.calculateTotalPrice(1);
+            totalPrice.setText(String.valueOf(totalPriceValue));
+
+            orderedItemsAdapter.setOrderedItemsList(orderedItemsList);
+            orderedItemsAdapter.notifyDataSetChanged();
+
             search.setText("");
         });
         search.addTextChangedListener(new TextWatcher() {
@@ -154,7 +172,7 @@ public class TakeOrder extends AppCompatActivity {
 
     private String getCurrentDateAndTime() {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(calendar.getTime());
     }
 

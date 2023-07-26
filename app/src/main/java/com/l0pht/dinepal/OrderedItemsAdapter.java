@@ -106,4 +106,7 @@ public class OrderedItemsAdapter extends RecyclerView.Adapter<OrderedItemsAdapte
         }
         return total;
     }
+    public void setOrderedItemsList(List<OrderedItem> orderedItemsList) {
+        this.orderedItemsList = orderedItemsList;
+    }
 }

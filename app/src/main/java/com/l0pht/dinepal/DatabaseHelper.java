@@ -9,7 +9,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -64,11 +66,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getSuggestions(String searchText) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT _id," + COLUMN_NAME + " AS itemName, _id FROM " + TABLE_NAME +
-                " WHERE itemName LIKE '%" + searchText + "%'";
-        Cursor cursor = db.rawQuery(query, null);
-        return cursor;
+        String query = "SELECT DISTINCT _id, " + COLUMN_NAME + " AS itemName FROM " + TABLE_NAME +
+                " WHERE itemName LIKE '%" + searchText + "%' GROUP BY itemName";
+        return db.rawQuery(query, null);
     }
+
 
     public double getItemPrice(String itemName) {
         double itemPrice = -1; // Default value if the item is not found or there is an error
@@ -137,6 +139,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return productId;
+    }
+    public int getIntItemID(int orderNo) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int prdtID = -1; // Default value if orderNo is not found
+        Cursor cursor = null;
+
+        try {
+            // Query the database to get the PrdtID for the given orderNo
+            cursor = db.query("order_mast", new String[]{"PrdtID"}, "OrderNo = ?", new String[]{String.valueOf(orderNo)}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                prdtID = cursor.getInt(cursor.getColumnIndexOrThrow("PrdtID"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return prdtID;
     }
 
     public String getItemName(int itemID) {
@@ -211,12 +235,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Order> getAllOrders() {
         List<Order> ordersList = new ArrayList<>();
-
-        // Assuming you have a SQLiteDatabase instance named 'database' initialized in your DatabaseHelper class
+        Set<Integer> uniqueOrderNumbers = new HashSet<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
         // Query the database to fetch all the orders
-        Cursor cursor = db.query("Order_mast", new String[]{"TableNo", "OrderNo"}, null, null, null, null, null);
+        Cursor cursor = db.query("order_mast", new String[]{"TableNo", "OrderNo"}, null, null, null, null, null);
 
         if (cursor != null) {
             // Loop through the cursor to retrieve the orders and their table numbers
@@ -224,15 +247,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int tableNo = cursor.getInt(cursor.getColumnIndexOrThrow("TableNo"));
                 int orderNo = cursor.getInt(cursor.getColumnIndexOrThrow("OrderNo"));
 
-                // Create an Order object and add it to the list
-                Order order = new Order(tableNo, orderNo);
-                ordersList.add(order);
+                // Check if the order number is already in the set
+                if (!uniqueOrderNumbers.contains(orderNo)) {
+                    Order order = new Order(tableNo, orderNo);
+                    ordersList.add(order);
+
+                    // Add the order number to the set to mark it as seen
+                    uniqueOrderNumbers.add(orderNo);
+                }
             }
             cursor.close();
         }
 
         return ordersList;
     }
+
 
     @SuppressLint("Range")
     public int getCurrentOrderNO() {
@@ -286,11 +315,92 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return menuItemsList;
     }
 
-    public void closeCursor(Cursor cursor) {
-        if (cursor != null && !cursor.isClosed()) {
-            cursor.close();
+    public int getLatestSlNo(int orderNo) {
+        int latestSlNo = -1;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            String query = "SELECT MAX(OrderSL) FROM order_mast WHERE OrderNo = ?";
+            cursor = db.rawQuery(query, new String[]{String.valueOf(orderNo)});
+
+            if (cursor != null && cursor.moveToFirst()) {
+                latestSlNo = cursor.getInt(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
+
+        return latestSlNo;
     }
 
+    @SuppressLint("Range")
+    public String getDate(int orderNo) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {"TrDate"};
+        String selection = "OrderNo = ?";
+        String[] selectionArgs = {String.valueOf(orderNo)};
+
+        Cursor cursor = db.query("order_mast", columns, selection, selectionArgs, null, null, null);
+        String date = "";
+
+        if (cursor.moveToFirst()) {
+            date = cursor.getString(cursor.getColumnIndex("TrDate"));
+        }
+
+        cursor.close();
+        db.close();
+
+        return date;
+    }
+
+    public boolean isItemExist(int orderNo, int PrdtID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM order_mast WHERE OrderNo = ? AND PrdtID = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(orderNo), String.valueOf(PrdtID)});
+        boolean exists = cursor != null && cursor.getCount() > 0;
+        if (cursor != null) {
+            cursor.close();
+        }
+        return exists;
+    }
+
+    public void updateOrderDetails(int orderNo, int PrdtID, int Qty, double ItemAmt) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("Qty", Qty);
+        values.put("ItemAmt", ItemAmt);
+
+        String selection = "OrderNo = ? AND PrdtID = ?";
+        String[] selectionArgs = {String.valueOf(orderNo), String.valueOf(PrdtID)};
+
+        db.update("order_mast", values, selection, selectionArgs);
+        db.close();
+    }
+
+    public void deleteOrderedItem(int OrderNo, int PrdtID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Define the WHERE clause to specify the row to be deleted
+        String whereClause = "OrderNo = ? AND PrdtID = ?";
+        String[] whereArgs = {String.valueOf(OrderNo), String.valueOf(PrdtID)};
+
+        // Perform the delete operation
+        int rowsDeleted = db.delete("order_mast", whereClause, whereArgs);
+
+        // Check if the row was successfully deleted
+        if (rowsDeleted > 0) {
+            Log.d("DatabaseHelper", "Row deleted successfully!");
+        } else {
+            Log.d("DatabaseHelper", "Failed to delete row!");
+        }
+
+        db.close();
+    }
 
 }

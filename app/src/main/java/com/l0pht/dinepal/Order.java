@@ -24,4 +24,6 @@ public class Order {
     public void setOrderNo(int orderNo) {
         this.orderNo = orderNo;
     }
+
+
 }
