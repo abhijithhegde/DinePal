@@ -42,6 +42,8 @@ public class UpdateOrder extends AppCompatActivity {
 
         search = findViewById(R.id.search);
         selectTableNo = findViewById(R.id.selectTableNo);
+        selectTableNo.setEnabled(false);
+        selectTableNo.setClickable(false);
         editOrder = findViewById(R.id.editOrder);
         order = findViewById(R.id.orderNo);
         recyclerView = findViewById(R.id.recyclerView);
